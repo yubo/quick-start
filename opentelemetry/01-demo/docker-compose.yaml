@@ -55,7 +55,7 @@ services:
       - otel-collector
 
   prometheus:
-    container_name: prometheus
+    #container_name: prometheus
     image: prom/prometheus:latest
     volumes:
       - ./prometheus.yaml:/etc/prometheus/prometheus.yml

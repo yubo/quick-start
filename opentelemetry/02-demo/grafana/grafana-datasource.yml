@@ -2,7 +2,7 @@ apiVersion: 1
 datasources:
 - name: Prometheus
   type: prometheus
-  url: ${PROM_ENDPOINT}
+  url: ${DEMO_PROM_ENDPOINT}
   isDefault: true
   access: proxy
   editable: true

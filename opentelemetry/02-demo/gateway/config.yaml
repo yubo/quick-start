@@ -1,0 +1,66 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        tls:
+          insecure: true
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    const_labels:
+      label1: value1
+
+  logging:
+
+  jaeger:
+    endpoint: "jaeger-all-in-one:14250"
+    tls:
+      insecure: true
+
+  elasticsearch:
+    endpoints: [ "${ES_ENDPOINT}" ]
+  elasticsearch/customname:
+    endpoints: [ "${ES_ENDPOINT}" ]
+    #cloudid: TRNMxjXlNJEt
+    #timeout: 2m
+    #headers:
+    #  myheader: test
+    index: "${ES_INDEX}"
+    #pipeline: mypipeline
+    user: "${ES_USER}"
+    password: "${ES_PASSWORD}"
+    #api_key: AvFsEiPs==
+    discover:
+      on_start: true
+    flush:
+      bytes: 10485760
+    retry:
+      max_requests: 5
+
+
+processors:
+  batch:
+
+extensions:
+  health_check:
+  pprof:
+    endpoint: :1888
+  zpages:
+    endpoint: :55679
+
+service:
+  #extensions: [pprof, zpages, health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, prometheus]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, elasticsearch]

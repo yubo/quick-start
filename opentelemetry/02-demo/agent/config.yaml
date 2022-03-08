@@ -1,0 +1,52 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+  filelog:
+    include: [ testdata/simple.log ]
+    start_at: beginning
+    operators:
+      - type: regex_parser
+        regex: '^(?P<time>\d{4}-\d{2}-\d{2}) (?P<sev>[A-Z]*) (?P<msg>.*)$'
+        timestamp:
+          parse_from: time
+          layout: '%Y-%m-%d'
+        severity:
+          parse_from: sev
+    converter:
+      max_flush_count: 100
+      flush_interval: 100ms
+
+  prometheus:
+    config:
+      scrape_configs: # https://github.com/prometheus/prometheus/blob/v2.28.1/docs/configuration/configuration.md#scrape_config
+        - job_name: 'node-exporter'
+          scrape_interval: 5s
+          static_configs:
+            - targets: ['node-exporter:9100']
+
+exporters:
+  logging:
+  otlp:
+    endpoint: "otel-gateway:4317" ##
+    tls:
+      insecure: true
+
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [logging, otlp]
+    metrics:
+      receivers: [otlp, prometheus]
+      processors: [batch]
+      exporters: [logging, otlp]
+    logs:
+      receivers: [otlp, filelog]
+      processors: [batch]
+      exporters: [logging, otlp]
