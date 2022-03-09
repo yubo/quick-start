@@ -19,17 +19,17 @@ exporters:
       insecure: true
 
   elasticsearch:
-    endpoints: [ "${ES_ENDPOINT}" ]
+    endpoints: [ "${ELASTIC_ENDPOINT}" ]
   elasticsearch/customname:
-    endpoints: [ "${ES_ENDPOINT}" ]
+    endpoints: [ "${ELASTIC_ENDPOINT}" ]
     #cloudid: TRNMxjXlNJEt
     #timeout: 2m
     #headers:
     #  myheader: test
-    index: "${ES_INDEX}"
+    index: "${ELASTIC_INDEX}"
     #pipeline: mypipeline
-    user: "${ES_USER}"
-    password: "${ES_PASSWORD}"
+    user: "${ELASTIC_USER}"
+    password: "${ELASTIC_PASSWORD}"
     #api_key: AvFsEiPs==
     discover:
       on_start: true

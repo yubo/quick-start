@@ -1,4 +1,4 @@
-.PHONY: clean
+.PHONY: clean iamge
 IMAGE_NAME=opentelemetry-collector-custom
 
 all: image
