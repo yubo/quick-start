@@ -31,7 +31,11 @@ exporters:
     endpoint: "otel-gateway:4317" ##
     tls:
       insecure: true
-
+  otlp/secure_no_verify:
+    endpoint: "otel-gateway:4317" ##
+    tls:
+      insecure: false
+      insecure_skip_verify: true
 
 processors:
   batch:

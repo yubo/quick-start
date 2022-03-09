@@ -5,7 +5,7 @@ networks:
     driver: bridge
   es:
     external:
-      name: elasticsearch_default
+      name: elastic
 
 volumes:
   prometheus_data: {}
