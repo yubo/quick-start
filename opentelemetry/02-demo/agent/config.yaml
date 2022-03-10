@@ -3,7 +3,7 @@ receivers:
     protocols:
       grpc:
   filelog:
-    include: [ testdata/simple.log ]
+    include: [ "/testdata/*.log" ]
     start_at: beginning
     operators:
       - type: regex_parser
@@ -16,7 +16,6 @@ receivers:
     converter:
       max_flush_count: 100
       flush_interval: 100ms
-
   prometheus:
     config:
       scrape_configs: # https://github.com/prometheus/prometheus/blob/v2.28.1/docs/configuration/configuration.md#scrape_config
@@ -24,18 +23,29 @@ receivers:
           scrape_interval: 5s
           static_configs:
             - targets: ['node-exporter:9100']
+  statsd:
+    endpoint: "otel-agent:8125" # default localhost:8125
+    aggregation_interval: 6s  # default 60s
+    enable_metric_type: false  # Enable the statsd receiver to be able to emit the metric type(gauge, counter, timer(in the future), histogram(in the future)) as a label.
+    timer_histogram_mapping:
+      - statsd_type: "histogram"
+        observer_type: "gauge"
+      - statsd_type: "timing"
+        observer_type: "gauge"
 
 exporters:
+  file:
+    path: /testdata/output.json
   logging:
   otlp:
     endpoint: "otel-gateway:4317" ##
     tls:
       insecure: true
-  otlp/secure_no_verify:
-    endpoint: "otel-gateway:4317" ##
-    tls:
-      insecure: false
-      insecure_skip_verify: true
+  #otlp/secure_no_verify:
+  #  endpoint: "otel-gateway:4317" ##
+  #  tls:
+  #    insecure: false
+  #    insecure_skip_verify: true
 
 processors:
   batch:
@@ -47,10 +57,13 @@ service:
       processors: [batch]
       exporters: [logging, otlp]
     metrics:
-      receivers: [otlp, prometheus]
+      receivers: [otlp, prometheus, statsd]
       processors: [batch]
       exporters: [logging, otlp]
     logs:
       receivers: [otlp, filelog]
       processors: [batch]
       exporters: [logging, otlp]
+  telemetry:
+    logs:
+      level: "debug"

@@ -14,14 +14,12 @@ services:
   ## for test
   term:
     image: ubuntu:latest
-    container_name: demo2
     stdin_open: true
     tty: true  
     networks:
       - monitoring
       - es
   
-  # apps
   node-exporter:
     image: prom/node-exporter:latest
     container_name: node-exporter
@@ -47,11 +45,12 @@ services:
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=otel-agent:4317
       - DEMO_SERVER_ENDPOINT=http://demo-server:7080/hello
-    #depends_on:
-    #  - demo-server
+    depends_on:
+      - demo-server
     #  - otel-agent
     networks:
       - monitoring
+    restart: on-failure
 
   demo-server:
     build:
@@ -71,8 +70,10 @@ services:
     command: ["--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}"]
     volumes:
       - ./agent/config.yaml:/etc/otel-collector-config.yaml
+      - ./testdata:/testdata
     ports:
-      - "4317"        # OTLP gRPC receiver
+      - "4317"          # OTLP gRPC receiver
+      - "8125:8125/udp" # receivers/statsd
     networks:
       - monitoring
 
@@ -82,19 +83,19 @@ services:
     volumes:
       - ./gateway/config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317"        # OTLP gRPC receiver
+      - "4317"          # OTLP gRPC receiver
     environment:
        - ELASTIC_ENDPOINT=http://es01:9200
        - ELASTIC_INDEX=test
-       - ELASTIC_USER=test
-       - ELASTIC_PASSWORD=test
+       - ELASTIC_USER=elastic
+       - ELASTIC_PASSWORD=admin1234
+    networks:
+      - monitoring
+      - es
     #depends_on:
     #  - jaeger-all-in-one
     #  - elasticsearch
     #  - prometheus
-    networks:
-      - monitoring
-      - es
 
 
   # backend services
@@ -111,6 +112,7 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
+      - '--web.enable-remote-write-receiver'
     ports:
       - "9090:9090"
     networks:

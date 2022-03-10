@@ -1,5 +1,8 @@
 # Install ES
 
+```
+docker network create elastic
+```
 
 
 ## docker-compose

@@ -9,8 +9,8 @@ stop:
 clean:
 	docker-compose down
 
-bash:
-	docker exec -it demo2 bash
+sh:
+	docker exec -it 02-demo_term_1 sh
 
 log:
 	docker-compose logs -f
