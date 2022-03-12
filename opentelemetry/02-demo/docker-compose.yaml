@@ -9,6 +9,7 @@ networks:
 
 volumes:
   prometheus_data: {}
+  grafana_plugins: {}
 
 services:
   ## for test
@@ -123,6 +124,7 @@ services:
     volumes:
       #- ./grafana.ini:/etc/grafana/grafana.ini
       - ./grafana/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - grafana_plugins:/var/lib/grafana/plugins
     environment:
       - PROM_ENDPOINT=http://prometheus:9090
     ports:
@@ -131,6 +133,7 @@ services:
       - prometheus
     networks:
       - monitoring
+      - es
 
   jaeger-all-in-one:
     image: jaegertracing/all-in-one:latest
@@ -140,3 +143,4 @@ services:
       - "14250"
     networks:
       - monitoring
+
