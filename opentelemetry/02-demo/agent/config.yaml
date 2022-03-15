@@ -3,10 +3,11 @@ receivers:
     protocols:
       grpc:
   filelog:
-    include: [ "/testdata/*.log" ]
+    include: [ "/testdata/simple.log" ]
     start_at: beginning
     operators:
       - type: regex_parser
+        #2020-08-25 INFO Something routine
         regex: '^(?P<time>\d{4}-\d{2}-\d{2}) (?P<sev>[A-Z]*) (?P<msg>.*)$'
         timestamp:
           parse_from: time
@@ -16,6 +17,21 @@ receivers:
     converter:
       max_flush_count: 100
       flush_interval: 100ms
+  filelog/nginx:
+    include: [ "/testdata/nginx-access.log" ]
+    #start_at: beginning
+    operators:
+      - type: regex_parser
+        #127.0.0.1 - - [04/Jul/2021:21:03:19 +0800] "GET /favicon-32x32.png HTTP/1.1" 200 628 "http://api.local/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
+        regex: '^(?P<remote_addr>[^\s]+) - (?P<remote_user>[^\s]+) \[(?P<time_local>[^\]]+)\] \"(?P<request>[^\"]+)\" (?P<status>\d+) (?P<body_bytes_sent>\d+) \"(?P<http_referer>[^\"]+)\" \"(?P<http_user_agent>[^\"]+)\"$'
+        timestamp:
+          parse_from: time_local
+          layout_type: gotime
+          layout: "02/Jan/2006:15:04:05 -0700"
+      - type: add
+        field: "type"
+        value: "nginx"
+
   prometheus:
     config:
       scrape_configs: # https://github.com/prometheus/prometheus/blob/v2.28.1/docs/configuration/configuration.md#scrape_config
@@ -36,6 +52,8 @@ receivers:
 exporters:
   file:
     path: /testdata/output.json
+  file/nginx:
+    path: /testdata/nginx-output.json
   logging:
   otlp:
     endpoint: "otel-gateway:4317" ##
@@ -61,9 +79,9 @@ service:
       processors: [batch]
       exporters: [logging, otlp]
     logs:
-      receivers: [otlp, filelog]
+      receivers: [otlp, filelog, filelog/nginx]
       processors: [batch]
-      exporters: [logging, otlp]
+      exporters: [logging, otlp, file]
   telemetry:
     logs:
       level: "debug"

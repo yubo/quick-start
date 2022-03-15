@@ -72,6 +72,11 @@ $ curl -X GET "localhost:9200/test/_search?from=0&size=1&pretty" -u elastic:admi
      "match": {
        "Body.msg": "hello,world"
      }
+   },
+   "sort": {
+     "@timestamp": {
+        "order": "desc"
+     }
    }
 }'
 {
@@ -149,3 +154,4 @@ docker-compose restart grafana
 - [OpenTelemetry Introduction](./otel-introduction.md)
 - [Install ElasticSearch](../../elasticsearch/)
 - https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/regex_parser.md
+- https://regex101.com/?flavor=golang
