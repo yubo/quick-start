@@ -73,15 +73,15 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, otlp]
+      exporters: [otlp]
     metrics:
       receivers: [otlp, prometheus, statsd]
       processors: [batch]
-      exporters: [logging, otlp]
+      exporters: [otlp]
     logs:
       receivers: [otlp, filelog, filelog/nginx]
       processors: [batch]
-      exporters: [logging, otlp, file]
+      exporters: [logging, otlp]
   telemetry:
     logs:
       level: "debug"
