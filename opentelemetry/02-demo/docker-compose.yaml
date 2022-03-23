@@ -84,7 +84,7 @@ services:
     volumes:
       - ./gateway/config.yaml:/etc/otel-collector-config.yaml
     ports:
-      - "4317"          # OTLP gRPC receiver
+      - "4317:4317"          # OTLP gRPC receiver
     environment:
        - ELASTIC_ENDPOINT=http://es01:9200
        - ELASTIC_INDEX=test
@@ -139,7 +139,7 @@ services:
     image: jaegertracing/all-in-one:latest
     ports:
       - "16686:16686"
-      - "14268"
+      - "14268:14268"
       - "14250"
     networks:
       - monitoring
