@@ -40,9 +40,7 @@ services:
       - monitoring
 
   demo-client:
-    build:
-      dockerfile: Dockerfile
-      context: ./client
+    image: ybbbbasdf/otel-demo-client:latest
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=otel-agent:4317
       - DEMO_SERVER_ENDPOINT=http://demo-server:7080/hello
@@ -54,9 +52,7 @@ services:
     restart: on-failure
 
   demo-server:
-    build:
-      dockerfile: Dockerfile
-      context: ./server
+    image: ybbbbasdf/otel-demo-server:latest
     environment:
       - OTEL_EXPORTER_OTLP_ENDPOINT=otel-agent:4317
     ports:

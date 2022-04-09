@@ -1,7 +1,6 @@
-.PHONY: clean iamge
-IMAGE_NAME=opentelemetry-collector-custom
+.PHONY: clean
 
-all: image
+all: otelcol-custom
 
 otelcol-custom: otelcol-builder.yaml
 	docker run --rm --name otelcol-builder \
@@ -14,9 +13,5 @@ otelcol-custom: otelcol-builder.yaml
 		golang:1.17 \
 		./build.sh
 
-image: otelcol-custom
-	docker build -f ./Dockerfile -t $(IMAGE_NAME) .
-
 clean:
 	rm -f otelcol-custom
-	docker rmi $(IMAGE_NAME)
