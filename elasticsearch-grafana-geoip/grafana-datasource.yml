@@ -1,7 +1,11 @@
 apiVersion: 1
 datasources:
+- name: Prometheus
+  type: prometheus
+  url: http://prometheus:9090
+  isDefault: true
+  editable: true
 - name: Elasticsearch
   type: elasticsearch
   url: http://es01:9200
-  isDefault: true
   editable: true
