@@ -1,0 +1,39 @@
+version: "3"
+
+networks:
+  monitoring:
+    driver: bridge
+  es:
+    external:
+      name: elastic
+
+volumes:
+  grafana_plugins: {}
+
+services:
+  otelcol:
+    image: otel/opentelemetry-collector-contrib:0.46.0
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"          # OTLP gRPC receiver
+    environment:
+       - ELASTIC_ENDPOINT=${ELASTIC_ENDPOINT}
+       - ELASTIC_INDEX=${ELASTIC_INDEX}
+       - ELASTIC_USER=elastic
+       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
+    networks:
+      - monitoring
+      - es
+
+  grafana:
+    image: grafana/grafana:latest
+    volumes:
+      - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - grafana_plugins:/var/lib/grafana/plugins
+    ports:
+      - 3000:3000
+    networks:
+      - monitoring
+      - es
