@@ -13,7 +13,7 @@ volumes:
 
 services:
   otelcol:
-    image: otel/opentelemetry-collector-contrib:0.46.0
+    image: ybbbbasdf/otelcol-geoip:latest
     command: ["--config=/etc/otel-collector-config.yaml"]
     volumes:
       - ./otelcol.yaml:/etc/otel-collector-config.yaml

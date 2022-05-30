@@ -15,8 +15,8 @@ receivers:
           layout_type: gotime
           layout: "02/Jan/2006:15:04:05 -0700"
       - type: add
-        field: "type"
-        value: "nginx"
+        field: attributes.type
+        value: nginx
 
   statsd:
     endpoint: ":8125" # default localhost:8125
@@ -70,6 +70,27 @@ exporters:
 processors:
   batch:
 
+  geoip:                       
+    # The field to get the ip address from for the geographical lookup.
+    field:                     
+      - ip
+    # The database filename referring to a database the module ships with (GeoLite2-City.mmdb, GeoLite2-Country.mmdb, or GeoLite2-ASN.mmdb) or a custom database in the ingest-geoip config directory.
+    #database_file: /opt/geoip/GeoLite2-City.mmdb
+    # The field that will hold the geographical information looked up from the MaxMind database.
+    target_field: geoip
+    # Controls what properties are added to the target_field based on the geoip lookup.
+    hash_precision: 3          
+    properties:                
+      - continent_name         
+      - country_iso_code       
+      - country_name
+      - region_iso_code        
+      - region_name            
+      - city_name              
+      - location               
+      - geohash 
+
+
 extensions:
   health_check:
   pprof:
@@ -82,9 +103,9 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, statsd]
-      processors: [batch]
+      processors: [batch, geoip]
       exporters: [logging, prometheusremotewrite]
     logs:
       receivers: [otlp, filelog/nginx]
-      processors: [batch]
+      processors: [batch, geoip]
       exporters: [logging, elasticsearch]
