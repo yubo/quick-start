@@ -20,6 +20,7 @@ services:
       - ./testdata:/testdata
     ports:
       - "4317:4317"          # OTLP gRPC receiver
+      - "8125:8125/udp"
     environment:
        - ELASTIC_ENDPOINT=${ELASTIC_ENDPOINT}
        - ELASTIC_INDEX=${ELASTIC_INDEX}
@@ -53,7 +54,7 @@ services:
     image: grafana/grafana:latest
     volumes:
       - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
-      - grafana_plugins:/var/lib/grafana/plugins
+      - ./grafana:/var/lib/grafana
     environment:
       - PROM_ENDPOINT=http://prometheus:9090
     ports:

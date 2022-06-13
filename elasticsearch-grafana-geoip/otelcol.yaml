@@ -5,13 +5,14 @@ receivers:
 
   filelog/nginx:
     include: [ "/testdata/nginx-access.log" ]
-    #start_at: beginning
+    start_at: beginning
     operators:
       - type: regex_parser
+        on_error: drop
         #127.0.0.1 - - [04/Jul/2021:21:03:19 +0800] "GET /favicon-32x32.png HTTP/1.1" 200 628 "http://api.local/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36"
-        regex: '^(?P<remote_addr>[^\s]+) - (?P<remote_user>[^\s]+) \[(?P<time_local>[^\]]+)\] \"(?P<request>[^\"]+)\" (?P<status>\d+) (?P<body_bytes_sent>\d+) \"(?P<http_referer>[^\"]+)\" \"(?P<http_user_agent>[^\"]+)\"$'
+        regex: '^(?P<ip>[^\s]+) - (?P<remote_user>[^\s]+) \[(?P<time_local>[^\]]+)\] \"(?P<request>[^\"]+)\" (?P<status>\d+) (?P<body_bytes_sent>\d+) \"(?P<http_referer>[^\"]+)\" \"(?P<http_user_agent>[^\"]+)\"$'
         timestamp:
-          parse_from: attributes.time 
+          parse_from: attributes.time_local
           layout_type: gotime
           layout: "02/Jan/2006:15:04:05 -0700"
       - type: add
@@ -19,7 +20,7 @@ receivers:
         value: nginx
 
   statsd:
-    endpoint: ":8125" # default localhost:8125
+    endpoint: "0.0.0.0:8125" # default localhost:8125
     aggregation_interval: 6s  # default 60s
     enable_metric_type: false  # Enable the statsd receiver to be able to emit the metric type(gauge, counter, timer(in the future), histogram(in the future)) as a label.
     timer_histogram_mapping:
@@ -28,44 +29,6 @@ receivers:
       - statsd_type: "timing"
         observer_type: "gauge"
 
-
-
-exporters:
-  logging:
-
-  prometheusremotewrite:
-    endpoint: "http://prometheus:9090/api/v1/write"
-    tls:
-      insecure: true
-    retry_on_failure:
-      enabled: true
-      initial_interval: 10s
-      max_interval: 60s
-      max_elapsed_time: 10m
-    #tls:
-    #  ca_file: "/var/lib/mycert.pem"
-    write_buffer_size: 524288
-    external_labels:
-      key1: value1
-      key2: value2
-    resource_to_telemetry_conversion:
-      enabled: true
-    remote_write_queue:
-      queue_size: 2000
-      num_consumers: 10
-
-
-  elasticsearch:
-    endpoints: [ "${ELASTIC_ENDPOINT}" ]
-    index: "${ELASTIC_INDEX}"
-    user: "${ELASTIC_USER}"
-    password: "${ELASTIC_PASSWORD}"
-    discover:
-      on_start: true
-    flush:
-      bytes: 10485760
-    retry:
-      max_requests: 5
 
 processors:
   batch:
@@ -91,6 +54,45 @@ processors:
       - geohash 
 
 
+
+exporters:
+  logging:
+  file:
+    path: /testdata/out.json
+
+  prometheusremotewrite:
+    endpoint: "http://prometheus:9090/api/v1/write"
+    tls:
+      insecure: true
+    retry_on_failure:
+      enabled: true
+      initial_interval: 10s
+      max_interval: 60s
+      max_elapsed_time: 10m
+    #tls:
+    #  ca_file: "/var/lib/mycert.pem"
+    write_buffer_size: 524288
+    external_labels:
+      key1: value1
+      key2: value2
+    resource_to_telemetry_conversion:
+      enabled: true
+    remote_write_queue:
+      queue_size: 2000
+      num_consumers: 10
+
+  elasticsearch:
+    endpoints: [ "${ELASTIC_ENDPOINT}" ]
+    index: "${ELASTIC_INDEX}"
+    user: "${ELASTIC_USER}"
+    password: "${ELASTIC_PASSWORD}"
+    discover:
+      on_start: true
+    flush:
+      bytes: 10485760
+    retry:
+      max_requests: 5
+
 extensions:
   health_check:
   pprof:
@@ -103,9 +105,9 @@ service:
   pipelines:
     metrics:
       receivers: [otlp, statsd]
-      processors: [batch, geoip]
+      processors: [batch]
       exporters: [logging, prometheusremotewrite]
-    logs:
-      receivers: [otlp, filelog/nginx]
-      processors: [batch, geoip]
-      exporters: [logging, elasticsearch]
+        #logs:
+        #  receivers: [otlp, filelog/nginx]
+        #  processors: [batch, geoip]
+        #  exporters: [logging, elasticsearch, file]
