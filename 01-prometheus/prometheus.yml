@@ -1,0 +1,29 @@
+global:
+  scrape_interval:     15s
+
+scrape_configs:
+  # https://api-kylin-xg02.intra.xiaojukeji.com/ks-km/metrics/prometheus
+  - job_name: "ks"
+    metrics_path: "/metrics/prometheus"
+    static_configs:
+      - targets: [ "10.190.45.5:8080", "10.190.42.97:8080", "10.190.43.83:8080", "10.190.43.240:8080", "10.190.44.48:8080" ]
+
+  - job_name: "kafka"
+    static_configs:
+    - targets: ["172.20.70.29:9308"]
+
+  #- job_name: "node"
+  #- job_name: "prometheus"
+  #  scrape_interval: 5s
+  #  static_configs:
+  #  - targets: ["localhost:9090"]
+
+  #- job_name: "node"
+  #  static_configs:
+  #  - targets: ["node-exporter:9100"]
+
+#remote_write:
+#  - url: "<Your Prometheus remote_write endpoint>"
+#    basic_auth:
+#      username: "<Your Grafana Username>"
+#      password: "<Your Grafana API key>"
