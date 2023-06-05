@@ -1,6 +1,6 @@
 # open-telemetry
 
-#### [01-demo](./01-demo)
+#### [01-otel-jaeger-promethues](./01-otel-jaeger-promethues)
 ```
                                                           +--------+
          +-------------+                               +--+ Zipkin |
@@ -17,7 +17,7 @@
                                                           +--------+
 ```
 
-#### [02-demo](./02-demo)
+#### [02-otel-agent-gateway-prometheus](./02-otel-agent-gateway-prometheus)
 ```
   +---------------+                                                    +---------------+
   | node-exporter +----+                                           +---+ ElasticSearch |

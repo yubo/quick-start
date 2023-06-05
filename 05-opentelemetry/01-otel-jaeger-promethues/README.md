@@ -30,6 +30,7 @@ The demo exposes the following backends:
 - Jaeger at http://0.0.0.0:16686
 - Zipkin at http://0.0.0.0:9411
 - Prometheus at http://0.0.0.0:9090 
+- OTLP gRPC receiver at :4317
 
 Notes:
 
@@ -38,16 +39,3 @@ Notes:
 
 To clean up any docker container from the demo run `docker-compose down` from 
 the `examples/demo` folder.
-
-### Using a Locally Built Image
-Developers interested in running a local build of the Collector need to build a
-docker image using the command below:
-
-```shell
-make docker-otelcol
-```
-
-And set an environment variable `OTELCOL_IMG` to `otelcol:latest` before 
-launching the command `docker-compose up -d`.
-
-
