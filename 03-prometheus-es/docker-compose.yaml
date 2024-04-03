@@ -1,24 +1,9 @@
 version: "3"
 
-networks:
-  monitoring:
-    driver: bridge
-  es:
-    external:
-      name: elastic
-
 volumes:
   prometheus_data: {}
 
 services:
-  ## for test
-  term:
-    image: ubuntu:latest
-    stdin_open: true
-    tty: true  
-    networks:
-      - monitoring
-      - es
   
   node-exporter:
     image: prom/node-exporter:latest
@@ -35,68 +20,6 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     ports:
       - "9100:9100"
-    networks:
-      - monitoring
-
-  demo-client:
-    build:
-      dockerfile: Dockerfile
-      context: ./client
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-agent:4317
-      - DEMO_SERVER_ENDPOINT=http://demo-server:7080/hello
-    depends_on:
-      - demo-server
-    #  - otel-agent
-    networks:
-      - monitoring
-    restart: on-failure
-
-  demo-server:
-    build:
-      dockerfile: Dockerfile
-      context: ./server
-    environment:
-      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-agent:4317
-    ports:
-      - "7080"
-    #depends_on:
-    #  - otel-agent
-    networks:
-      - monitoring
-
-  otel-agent:
-    image: ${OTELCOL_IMG}
-    command: ["--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}"]
-    volumes:
-      - ./agent/config.yaml:/etc/otel-collector-config.yaml
-      - ./testdata:/testdata
-    ports:
-      - "4317"          # OTLP gRPC receiver
-      - "8125:8125/udp" # receivers/statsd
-    networks:
-      - monitoring
-
-  otel-gateway:
-    image: ${OTELCOL_IMG}
-    command: ["--config=/etc/otel-collector-config.yaml", "${OTELCOL_ARGS}"]
-    volumes:
-      - ./gateway/config.yaml:/etc/otel-collector-config.yaml
-    ports:
-      - "4317"          # OTLP gRPC receiver
-    environment:
-       - ELASTIC_ENDPOINT=http://es01:9200
-       - ELASTIC_INDEX=test
-       - ELASTIC_USER=elastic
-       - ELASTIC_PASSWORD=admin1234
-    networks:
-      - monitoring
-      - es
-    #depends_on:
-    #  - jaeger-all-in-one
-    #  - elasticsearch
-    #  - prometheus
-
 
   # backend services
   prometheus:
@@ -104,7 +27,7 @@ services:
     #container_name: prometheus
     restart: unless-stopped
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
@@ -115,28 +38,14 @@ services:
       - '--web.enable-remote-write-receiver'
     ports:
       - "9090:9090"
-    networks:
-      - monitoring
 
   grafana:
     image: grafana/grafana:latest
     volumes:
-      #- ./grafana.ini:/etc/grafana/grafana.ini
-      - ./grafana/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
+      - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yaml
     environment:
       - PROM_ENDPOINT=http://prometheus:9090
     ports:
       - 3000:3000
     depends_on:
       - prometheus
-    networks:
-      - monitoring
-
-  jaeger-all-in-one:
-    image: jaegertracing/all-in-one:latest
-    ports:
-      - "16686:16686"
-      - "14268"
-      - "14250"
-    networks:
-      - monitoring
