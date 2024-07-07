@@ -11,6 +11,10 @@ exporters:
 
   logging:
 
+  zipkin:
+    endpoint: "http://zipkin-all-in-one:9411/api/v2/spans"
+    format: proto
+
   jaeger:
     endpoint: jaeger-all-in-one:14250
     tls:
@@ -32,7 +36,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [logging, jaeger]
+      exporters: [logging, zipkin, jaeger]
     metrics:
       receivers: [otlp]
       processors: [batch]
