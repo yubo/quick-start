@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: server
-        image: ealen/echo-server:latest
+        image: registry.aliyuncs.com/google_containers/echoserver:1.10
         ports:
         - containerPort: 8080
           protocol: TCP
