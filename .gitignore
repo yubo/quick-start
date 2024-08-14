@@ -1,3 +1,5 @@
 tmp/
+
 .log
 output.*
+.DS_Store
