@@ -4,13 +4,16 @@ name=dev
 image=kindest/node:v1.27.3
 
 up:
-	#kind create cluster --name $(name) --image $(image) --config ./kind-config.yaml --retain -v 1
-	kind create cluster --name $(name) --image $(image) 
+	KUBECONFIG=~/.kube/kind-dev.yaml && \
+	kind create cluster --name $(name) --image $(image) --config ./kind-config.yaml --retain -v 1
+	#kind create cluster --name $(name) --image $(image) 
 
 clean:
+	KUBECONFIG=~/.kube/kind-dev.yaml && \
 	kind delete cluster --name $(name)
 
 deploy:
+	KUBECONFIG=~/.kube/kind-dev.yaml && \
 	kubectl apply -f ./deploy.yaml
 
 install:

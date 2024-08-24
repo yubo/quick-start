@@ -1,0 +1,2 @@
+export __env_name=kind-dev
+export KUBECONFIG=~/.kube/kind-dev.yaml
