@@ -5,7 +5,7 @@ metadata:
   labels:
     app: echo-server
 spec:
-  replicas: 6
+  replicas: 1
   selector:
     matchLabels:
       app: echo-server
@@ -16,7 +16,8 @@ spec:
     spec:
       containers:
       - name: server
-        image: registry.aliyuncs.com/google_containers/echoserver:1.10
+        #image: k8s.gcr.io/echoserver:1.10
+        image: k8s.gcr.io/echoserver-arm:1.8
         ports:
         - containerPort: 8080
           protocol: TCP
