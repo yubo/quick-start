@@ -1,0 +1,87 @@
+apiVersion: policy.kruise.io/v1alpha1
+kind: PodUnavailableBudget
+metadata:
+  name: sample-pub
+spec:
+  #targetRef:
+  #  apiVersion: apps.kruise.io/v1alpha1
+  #  # cloneset, deployment, statefulset etc.
+  #  kind: CloneSet
+  #  name: sample
+  # selector label query over pods managed by the budget
+  # selector and TargetReference are mutually exclusive, targetRef is priority to take effect.
+  # selector is commonly used in scenarios where applications are deployed using multiple workloads,
+  # and targetRef is used for protection against a single workload.
+  selector:
+    matchLabels:
+      app: sample
+  # maximum number of Pods unavailable for the current cloneset, the example is cloneset.replicas(5) * 60% = 3
+  # maxUnavailable and minAvailable are mutually exclusive, maxUnavailable is priority to take effect
+  #maxUnavailable: 60%
+  #maxUnavailable: 20%
+  # Minimum number of Pods available for the current cloneset, the example is cloneset.replicas(5) * 40% = 2
+  minAvailable: 80%
+
+---
+apiVersion: apps.kruise.io/v1alpha1
+kind: CloneSet
+metadata:
+  labels:
+    app: sample
+  name: sample-1
+spec:
+  replicas: 1
+  #scaleStrategy:
+  #  maxUnavailable: 2
+  selector:
+    matchLabels:
+      app: sample
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable
+        ports:
+          - containerPort: 80
+            name: http-web-svc
+---
+apiVersion: apps.kruise.io/v1alpha1
+kind: CloneSet
+metadata:
+  labels:
+    app: sample
+  name: sample-2
+spec:
+  replicas: 9
+  #scaleStrategy:
+  #  maxUnavailable: 2
+  selector:
+    matchLabels:
+      app: sample
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable
+        ports:
+          - containerPort: 80
+            name: http-web-svc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-sample-service
+spec:
+  selector:
+    app: sample
+  ports:
+  - name: name-of-service-port
+    protocol: TCP
+    port: 80
+    targetPort: http-web-svc

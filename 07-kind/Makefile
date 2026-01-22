@@ -1,7 +1,7 @@
 .PHONY: install up clean
 
 name=dev
-image=kindest/node:v1.27.3
+image=kindest/node:v1.33.2
 
 up:
 	KUBECONFIG=~/.kube/kind-dev.yaml && \
@@ -17,4 +17,4 @@ deploy:
 	kubectl apply -f ./deploy.yaml
 
 install:
-	go install sigs.k8s.io/kind@v0.19.0
+	go install sigs.k8s.io/kind@v0.29.0

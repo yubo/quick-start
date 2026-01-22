@@ -1,0 +1,48 @@
+apiVersion: apps.kruise.io/v1alpha1
+kind: CloneSet
+metadata:
+  labels:
+    app: sample
+  name: sample
+spec:
+  replicas: 2
+
+  # 流式扩容
+  #minReadySeconds: 60
+  #scaleStrategy:
+  #  maxUnavailable: 1
+
+  updateStrategy:
+    # ReCreate: 控制器会删除旧 Pod 和它的 PVC，然后用新版本重新创建出来。
+    # InPlaceIfPossible: 控制器会优先尝试原地升级 Pod，如果不行再采用重建升级。当前， 仅支持容器镜像等字段的原地升级。
+    # InPlaceOnly: 控制器只允许采用原地升级。因此，用户只能修改容器镜像等字段，如果尝试修改其他字段会被 Kruise 拒绝。
+    type: ReCreate
+
+    # 最大不可用
+    #maxUnavailable: 20%
+    # 最大弹性数量
+    #maxSurge: 3
+  selector:
+    matchLabels:
+      app: sample
+  lifecycle:
+    #preDelete:
+    #  markPodNotReady: true
+    #  finalizersHandler:
+    #  - example.io/unready-blocker
+    #inPlaceUpdate:
+    #  markPodNotReady: true
+    #  finalizersHandler:
+    #  - example.io/unready-blocker 
+  template:
+    metadata:
+      labels:
+        app: sample
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:stable
+        ports:
+          - containerPort: 80
+            name: http-web-svc
+
