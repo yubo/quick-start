@@ -1,0 +1,19 @@
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.60
+    container_name: jaeger
+    restart: always
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+      - SPAN_STORAGE_TYPE=memory
+      - MEMORY_MAX_TRACES=200000
+      - GOMEMLIMIT=6500MiB
+      - GOGC=50
+      - LOG_LEVEL=info
+    ports:
+      - "16686:16686"   # UI
+      - "4317:4317"     # OTLP gRPC
+      - "4318:4318"     # OTLP HTTP
+    mem_limit: 8g          # 硬限(compose v2 顶层字段)
+    memswap_limit: 8g      # 禁用 swap
+    stop_grace_period: 10s
